@@ -6,6 +6,7 @@ import { Variable } from '@/lib/api';
 import VariableList from '@/components/VariableList';
 import CreateVariableModal from '@/components/CreateVariableModal';
 import EditVariableModal from '@/components/EditVariableModal';
+import ImportEnvModal from '@/components/ImportEnvModal';
 import UserMenu from '@/components/UserMenu';
 import BrandName from '@/components/BrandName';
 
@@ -18,6 +19,7 @@ export default function EnvironmentPage() {
   const [error, setError] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [editingVariable, setEditingVariable] = useState<Variable | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -197,15 +199,26 @@ export default function EnvironmentPage() {
             </p>
           </div>
           {isAdmin && (
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="px-4 py-2 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
-              style={{ backgroundColor: '#5B8DB8' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4A7BA5'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#5B8DB8'}
-            >
-              Add Variable
-            </button>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowImportModal(true)}
+                className="px-4 py-2 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
+                style={{ backgroundColor: '#5B8DB8' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4A7BA5'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#5B8DB8'}
+              >
+                Import .env
+              </button>
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="px-4 py-2 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
+                style={{ backgroundColor: '#5B8DB8' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4A7BA5'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#5B8DB8'}
+              >
+                Add Variable
+              </button>
+            </div>
           )}
         </div>
 
@@ -240,6 +253,17 @@ export default function EnvironmentPage() {
               setEditingVariable(null);
             }}
             onSubmit={handleUpdate}
+          />
+        )}
+
+        {showImportModal && (
+          <ImportEnvModal
+            isOpen={showImportModal}
+            onClose={() => setShowImportModal(false)}
+            onImportComplete={async () => {
+              setShowImportModal(false);
+              await refreshVariables();
+            }}
           />
         )}
       </main>
