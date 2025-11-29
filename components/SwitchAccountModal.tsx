@@ -1,26 +1,22 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState } from 'react';
 
-interface CreateEnvironmentModalProps {
+interface SwitchAccountModalProps {
   onClose: () => void;
-  onCreate: (name: string, description?: string) => Promise<void>;
+  onSuccess: () => void;
 }
 
-export default function CreateEnvironmentModal({
-  onClose,
-  onCreate,
-}: CreateEnvironmentModalProps) {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+export default function SwitchAccountModal({ onClose, onSuccess }: SwitchAccountModalProps) {
+  const [apiKey, setApiKey] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name.trim()) {
-      setError('Environment name is required');
+    if (!apiKey.trim()) {
+      setError('API key is required');
       return;
     }
 
@@ -28,9 +24,25 @@ export default function CreateEnvironmentModal({
     setError(null);
 
     try {
-      await onCreate(name.trim(), description.trim() || undefined);
+      // Validate the new API key
+      const response = await fetch('/api/auth/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ apiKey: apiKey.trim() }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Invalid API key');
+      }
+
+      // If validation succeeds, the session is already updated
+      // Wait a moment to ensure cookie is set, then force a hard reload
+      await new Promise(resolve => setTimeout(resolve, 200));
+      // Force a hard reload to clear all caches
+      window.location.href = window.location.href;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create environment');
+      setError(err instanceof Error ? err.message : 'Failed to switch account');
       setLoading(false);
     }
   };
@@ -40,7 +52,7 @@ export default function CreateEnvironmentModal({
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold" style={{ color: '#2C2C2C' }}>
-            Create Environment
+            Switch Account
           </h2>
           <button
             onClick={onClose}
@@ -56,17 +68,17 @@ export default function CreateEnvironmentModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label
-              htmlFor="name"
+              htmlFor="apiKey"
               className="block text-sm font-medium mb-2"
               style={{ color: '#2C2C2C' }}
             >
-              Name <span style={{ color: '#C85A5A' }}>*</span>
+              New API Key
             </label>
             <input
-              id="name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              id="apiKey"
+              type="password"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
               required
               className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none transition-colors"
               style={{ 
@@ -76,35 +88,13 @@ export default function CreateEnvironmentModal({
               }}
               onFocus={(e) => e.currentTarget.style.borderColor = '#5B8DB8'}
               onBlur={(e) => e.currentTarget.style.borderColor = '#E8E6E1'}
-              placeholder="e.g., development, production"
+              placeholder="Enter your API key"
               disabled={loading}
+              autoFocus
             />
-          </div>
-
-          <div>
-            <label
-              htmlFor="description"
-              className="block text-sm font-medium mb-2"
-              style={{ color: '#2C2C2C' }}
-            >
-              Description
-            </label>
-            <textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={3}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none transition-colors"
-              style={{ 
-                borderColor: '#E8E6E1',
-                backgroundColor: '#FFFFFF',
-                color: '#2C2C2C',
-              }}
-              onFocus={(e) => e.currentTarget.style.borderColor = '#5B8DB8'}
-              onBlur={(e) => e.currentTarget.style.borderColor = '#E8E6E1'}
-              placeholder="Optional description for this environment"
-              disabled={loading}
-            />
+            <p className="mt-2 text-xs" style={{ color: '#9A9A9A' }}>
+              Enter a new API key to switch accounts. Your session will be updated.
+            </p>
           </div>
 
           {error && (
@@ -127,21 +117,21 @@ export default function CreateEnvironmentModal({
             </button>
             <button
               type="submit"
-              disabled={loading || !name.trim()}
+              disabled={loading || !apiKey.trim()}
               className="px-4 py-2 text-white font-medium rounded-lg transition-colors shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ backgroundColor: loading || !name.trim() ? '#9A9A9A' : '#5B8DB8' }}
+              style={{ backgroundColor: loading || !apiKey.trim() ? '#9A9A9A' : '#5B8DB8' }}
               onMouseEnter={(e) => {
-                if (!loading && name.trim()) {
+                if (!loading && apiKey.trim()) {
                   e.currentTarget.style.backgroundColor = '#4A7BA5';
                 }
               }}
               onMouseLeave={(e) => {
-                if (!loading && name.trim()) {
+                if (!loading && apiKey.trim()) {
                   e.currentTarget.style.backgroundColor = '#5B8DB8';
                 }
               }}
             >
-              {loading ? 'Creating...' : 'Create'}
+              {loading ? 'Switching...' : 'Switch Account'}
             </button>
           </div>
         </form>

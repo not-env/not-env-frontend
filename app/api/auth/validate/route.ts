@@ -15,12 +15,19 @@ export async function POST(request: NextRequest) {
 
     // Validate the API key and determine its type
     const keyInfo = await validateApiKey(apiKey);
+    
+    console.log('[Validate API] Key validated:', {
+      keyType: keyInfo.keyType,
+      environmentId: keyInfo.environmentId,
+    });
 
     // Set encrypted session cookie
     await setSession({
       apiKey,
       keyType: keyInfo.keyType,
     });
+    
+    console.log('[Validate API] Session cookie set with keyType:', keyInfo.keyType);
 
     return NextResponse.json({
       keyType: keyInfo.keyType,

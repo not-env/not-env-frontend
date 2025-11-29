@@ -5,7 +5,11 @@ export const metadata: Metadata = {
   title: 'Not-Env',
   description: 'Environment variable management system',
   icons: {
-    icon: '/icon.png',
+    icon: [
+      { url: '/favicon.ico', type: 'image/svg+xml' },
+    ],
+    shortcut: '/favicon.ico',
+    apple: '/favicon.ico',
   },
 };
 
