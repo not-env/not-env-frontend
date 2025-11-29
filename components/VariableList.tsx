@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Variable } from '@/lib/api';
+import DeleteVariableModal from './DeleteVariableModal';
 
 interface VariableListProps {
   variables: Variable[];
@@ -24,6 +25,8 @@ export default function VariableList({
   const [copiedValue, setCopiedValue] = useState<string | null>(null);
   const [fadingKey, setFadingKey] = useState<string | null>(null);
   const [fadingValue, setFadingValue] = useState<string | null>(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [variableToDelete, setVariableToDelete] = useState<string | null>(null);
 
   const copyToClipboard = async (text: string, type: 'key' | 'value', identifier: string) => {
     try {
@@ -254,21 +257,25 @@ export default function VariableList({
                       <>
                         <button
                           onClick={() => onEdit(variable)}
-                          className="transition-colors"
-                          style={{ color: '#5B8DB8' }}
-                          onMouseEnter={(e) => e.currentTarget.style.color = '#4A7BA5'}
-                          onMouseLeave={(e) => e.currentTarget.style.color = '#5B8DB8'}
+                          className="px-4 py-2 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
+                          style={{ backgroundColor: '#5B8DB8' }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4A7BA5'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#5B8DB8'}
                         >
                           Edit
                         </button>
                         <button
-                          onClick={() => onDelete(variable.key)}
-                          className="transition-colors"
+                          onClick={() => {
+                            setVariableToDelete(variable.key);
+                            setDeleteModalOpen(true);
+                          }}
+                          className="px-2 py-1.5 text-lg transition-colors rounded"
                           style={{ color: '#C85A5A' }}
                           onMouseEnter={(e) => e.currentTarget.style.color = '#B54848'}
                           onMouseLeave={(e) => e.currentTarget.style.color = '#C85A5A'}
+                          title="Delete variable"
                         >
-                          Delete
+                          🗑️
                         </button>
                       </>
                     )}
@@ -279,6 +286,22 @@ export default function VariableList({
           </tbody>
         </table>
       </div>
+
+      <DeleteVariableModal
+        isOpen={deleteModalOpen}
+        variableKey={variableToDelete || ''}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setVariableToDelete(null);
+        }}
+        onConfirm={() => {
+          if (variableToDelete) {
+            onDelete(variableToDelete);
+            setDeleteModalOpen(false);
+            setVariableToDelete(null);
+          }
+        }}
+      />
     </div>
   );
 }

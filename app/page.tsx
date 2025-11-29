@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Logo from '@/components/Logo';
 
 export default function LoginPage() {
   const [apiKey, setApiKey] = useState('');
@@ -45,9 +46,9 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#FEFCF8' }}>
       <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-xl" style={{ borderColor: '#E8E6E1' }}>
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold mb-2" style={{ color: '#2C2C2C' }}>
-            Not-Env
-          </h1>
+          <div className="flex justify-center mb-6">
+            <Logo size="medium" />
+          </div>
           <p style={{ color: '#6B6B6B' }}>
             Enter your API key to continue
           </p>

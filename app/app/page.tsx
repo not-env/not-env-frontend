@@ -8,6 +8,7 @@ import EnvironmentList from '@/components/EnvironmentList';
 import CreateEnvironmentModal from '@/components/CreateEnvironmentModal';
 import KeyDisplayModal from '@/components/KeyDisplayModal';
 import UserMenu from '@/components/UserMenu';
+import BrandName from '@/components/BrandName';
 
 export default function AppPage() {
   const router = useRouter();
@@ -102,10 +103,6 @@ export default function AppPage() {
   };
 
   const handleDeleteEnvironment = async (id: number) => {
-    if (!confirm(`Are you sure you want to delete environment ${id}? This action cannot be undone.`)) {
-      return;
-    }
-
     try {
       const response = await fetch(`/api/environments/${id}`, {
         method: 'DELETE',
@@ -118,7 +115,7 @@ export default function AppPage() {
 
       await loadEnvironments(); // Refresh the list
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to delete environment');
+      setError(err instanceof Error ? err.message : 'Failed to delete environment');
     }
   };
 
@@ -137,9 +134,7 @@ export default function AppPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <h1 className="text-xl font-semibold" style={{ color: '#2C2C2C' }}>
-                Not-Env - API Keys Management
-              </h1>
+              <BrandName showSubtitle subtitle="API Keys Management" />
             </div>
             <div className="flex items-center">
               <UserMenu keyType={keyType || undefined} />
@@ -152,7 +147,7 @@ export default function AppPage() {
         <div className="mb-6 flex justify-between items-center">
           <div>
             <h2 className="text-2xl font-bold" style={{ color: '#2C2C2C' }}>
-              Environment API Keys
+              Environments
             </h2>
             <p className="mt-1 text-sm" style={{ color: '#6B6B6B' }}>
               Manage environments and their API keys. Keys are generated when environments are created.

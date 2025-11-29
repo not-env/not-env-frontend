@@ -6,8 +6,8 @@ import { Variable } from '@/lib/api';
 import VariableList from '@/components/VariableList';
 import CreateVariableModal from '@/components/CreateVariableModal';
 import EditVariableModal from '@/components/EditVariableModal';
-import EnvironmentKeysModal from '@/components/EnvironmentKeysModal';
 import UserMenu from '@/components/UserMenu';
+import BrandName from '@/components/BrandName';
 
 export default function EnvironmentPage() {
   const router = useRouter();
@@ -18,7 +18,6 @@ export default function EnvironmentPage() {
   const [error, setError] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [showKeysModal, setShowKeysModal] = useState(false);
   const [editingVariable, setEditingVariable] = useState<Variable | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -134,10 +133,6 @@ export default function EnvironmentPage() {
   };
 
   const handleDelete = async (key: string) => {
-    if (!confirm(`Are you sure you want to delete the variable "${key}"?`)) {
-      return;
-    }
-
     try {
       const res = await fetch(`/api/variables/${encodeURIComponent(key)}`, {
         method: 'DELETE',
@@ -175,27 +170,14 @@ export default function EnvironmentPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <h1 className="text-xl font-semibold" style={{ color: '#2C2C2C' }}>
-                Not-Env - {environment?.name || 'Environment'}
-              </h1>
+              <BrandName showSubtitle subtitle={environment?.name || 'Environment'} />
               {environment?.description && (
                 <span className="ml-3 text-sm" style={{ color: '#6B6B6B' }}>
                   {environment.description}
                 </span>
               )}
             </div>
-            <div className="flex items-center space-x-4">
-              {isAdmin && (
-                <button
-                  onClick={() => setShowKeysModal(true)}
-                  className="px-4 py-2 text-sm font-medium rounded-lg transition-colors"
-                  style={{ color: '#6B6B6B' }}
-                  onMouseEnter={(e) => e.currentTarget.style.color = '#2C2C2C'}
-                  onMouseLeave={(e) => e.currentTarget.style.color = '#6B6B6B'}
-                >
-                  View Keys
-                </button>
-              )}
+            <div className="flex items-center">
               <UserMenu keyType={keyType || undefined} />
             </div>
           </div>
@@ -258,12 +240,6 @@ export default function EnvironmentPage() {
               setEditingVariable(null);
             }}
             onSubmit={handleUpdate}
-          />
-        )}
-
-        {showKeysModal && isAdmin && (
-          <EnvironmentKeysModal
-            onClose={() => setShowKeysModal(false)}
           />
         )}
       </main>

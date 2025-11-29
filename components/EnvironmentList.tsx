@@ -1,6 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import { Environment } from '@/lib/api';
+import DeleteEnvironmentModal from './DeleteEnvironmentModal';
 
 interface EnvironmentListProps {
   environments: Environment[];
@@ -15,6 +17,9 @@ export default function EnvironmentList({
   refreshing = false,
   onRefresh,
 }: EnvironmentListProps) {
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [environmentToDelete, setEnvironmentToDelete] = useState<Environment | null>(null);
+
   const formatDate = (dateString: string) => {
     try {
       return new Date(dateString).toLocaleString();
@@ -104,13 +109,17 @@ export default function EnvironmentList({
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button
-                    onClick={() => onDelete(env.id)}
-                    className="transition-colors"
+                    onClick={() => {
+                      setEnvironmentToDelete(env);
+                      setDeleteModalOpen(true);
+                    }}
+                    className="px-2 py-1.5 text-lg transition-colors rounded"
                     style={{ color: '#C85A5A' }}
                     onMouseEnter={(e) => e.currentTarget.style.color = '#B54848'}
                     onMouseLeave={(e) => e.currentTarget.style.color = '#C85A5A'}
+                    title="Delete environment"
                   >
-                    Delete
+                    🗑️
                   </button>
                 </td>
               </tr>
@@ -118,6 +127,22 @@ export default function EnvironmentList({
           </tbody>
         </table>
       </div>
+
+      <DeleteEnvironmentModal
+        isOpen={deleteModalOpen}
+        environmentName={environmentToDelete?.name || ''}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setEnvironmentToDelete(null);
+        }}
+        onConfirm={() => {
+          if (environmentToDelete) {
+            onDelete(environmentToDelete.id);
+            setDeleteModalOpen(false);
+            setEnvironmentToDelete(null);
+          }
+        }}
+      />
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import UserMenu from '@/components/UserMenu';
+import BrandName from '@/components/BrandName';
 
 interface UserInfo {
   key_type: string;
@@ -79,9 +80,7 @@ export default function ProfilePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <h1 className="text-xl font-semibold" style={{ color: '#2C2C2C' }}>
-                Not-Env - Profile
-              </h1>
+              <BrandName showSubtitle subtitle="Profile" />
             </div>
             <div className="flex items-center">
               <UserMenu keyType={keyType || undefined} />
