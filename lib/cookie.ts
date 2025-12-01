@@ -88,6 +88,7 @@ export async function refreshSession(): Promise<SessionData | null> {
     keyType: session.keyType,
     expiresAt 
   };
+  
   const token = await encryptSession(sessionData);
   
   cookieStore.set('session', token, {

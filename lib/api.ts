@@ -11,12 +11,32 @@ export interface KeyInfo {
 }
 
 export async function validateApiKey(apiKey: string): Promise<KeyInfo> {
-  // Strategy: Try different endpoints to determine key type
-  // 1. Try /environments - if 200, it's APP_ADMIN
-  // 2. Try /environment - if 200, it's ENV_ADMIN or ENV_READ_ONLY
-  // 3. Try /environment with PATCH - if 200/204, it's ENV_ADMIN, else ENV_READ_ONLY
+  // Use the /me endpoint to get key type directly from the database
+  // This is more reliable than trying different endpoints
   
   try {
+    const meResponse = await fetch(`${API_URL}/me`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (meResponse.status === 200) {
+      const data = await meResponse.json();
+      
+      const keyType = data.key_type as 'APP_ADMIN' | 'ENV_ADMIN' | 'ENV_READ_ONLY';
+      const environmentId = data.environment_id as number | undefined;
+      
+      return {
+        keyType,
+        environmentId,
+      };
+    }
+
+    // If /me fails, fall back to heuristic approach
+    
     // First, try to list environments (APP_ADMIN only)
     const envsResponse = await fetch(`${API_URL}/environments`, {
       method: 'GET',
@@ -68,9 +88,9 @@ export async function validateApiKey(apiKey: string): Promise<KeyInfo> {
     }
 
     // If we get here, the key is invalid
-    if (envResponse.status === 401 || envsResponse.status === 401) {
+    if (envResponse.status === 401 || envsResponse.status === 401 || meResponse.status === 401) {
       throw new Error('Invalid API key');
-    } else if (envResponse.status === 403 || envsResponse.status === 403) {
+    } else if (envResponse.status === 403 || envsResponse.status === 403 || meResponse.status === 403) {
       throw new Error('Invalid API key or insufficient permissions');
     } else {
       throw new Error('Failed to validate API key');
@@ -105,11 +125,14 @@ export async function apiRequest<T>(
   });
 
   if (!response.ok) {
-    const error: ApiError = await response.json().catch(() => ({
-      error: response.statusText,
-      message: 'Request failed',
-    }));
-    throw new Error(error.message || error.error || 'Request failed');
+    let errorMessage = 'Request failed';
+    try {
+      const error: ApiError = await response.json();
+      errorMessage = error.message || error.error || 'Request failed';
+    } catch (e) {
+      errorMessage = response.statusText || 'Request failed';
+    }
+    throw new Error(errorMessage);
   }
 
   if (response.status === 204) {
@@ -175,6 +198,90 @@ export async function deleteEnvironment(
 ): Promise<void> {
   await apiRequest(`/environments/${environmentId}`, {
     method: 'DELETE',
+    apiKey,
+  });
+}
+
+// Environment variable API functions
+export interface Variable {
+  key: string;
+  value: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ListVariablesResponse {
+  variables: Variable[];
+}
+
+export interface GetVariableResponse extends Variable {}
+
+export interface SetVariableRequest {
+  value: string;
+}
+
+export async function listVariables(apiKey: string): Promise<Variable[]> {
+  const response = await apiRequest<ListVariablesResponse>('/variables', {
+    method: 'GET',
+    apiKey,
+  });
+  return response.variables;
+}
+
+export async function getVariable(apiKey: string, key: string): Promise<Variable> {
+  return apiRequest<GetVariableResponse>(`/variables/${encodeURIComponent(key)}`, {
+    method: 'GET',
+    apiKey,
+  });
+}
+
+export async function setVariable(
+  apiKey: string,
+  key: string,
+  value: string
+): Promise<void> {
+  // Ensure value is a string
+  const stringValue = String(value);
+  
+  await apiRequest(`/variables/${encodeURIComponent(key)}`, {
+    method: 'PUT',
+    body: { value: stringValue },
+    apiKey,
+  });
+}
+
+export async function deleteVariable(apiKey: string, key: string): Promise<void> {
+  await apiRequest(`/variables/${encodeURIComponent(key)}`, {
+    method: 'DELETE',
+    apiKey,
+  });
+}
+
+// Environment info API functions
+export interface EnvironmentInfo {
+  id: number;
+  organization_id: number;
+  name: string;
+  description?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EnvironmentKeysResponse {
+  env_admin: string;
+  env_read_only: string;
+}
+
+export async function getEnvironment(apiKey: string): Promise<EnvironmentInfo> {
+  return apiRequest<EnvironmentInfo>('/environment', {
+    method: 'GET',
+    apiKey,
+  });
+}
+
+export async function getEnvironmentKeys(apiKey: string): Promise<EnvironmentKeysResponse> {
+  return apiRequest<EnvironmentKeysResponse>('/environment/keys', {
+    method: 'GET',
     apiKey,
   });
 }

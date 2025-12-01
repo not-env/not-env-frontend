@@ -1,26 +1,33 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState } from 'react';
 
-interface CreateEnvironmentModalProps {
+interface CreateVariableModalProps {
   onClose: () => void;
-  onCreate: (name: string, description?: string) => Promise<void>;
+  onSubmit: (key: string, value: string) => Promise<void>;
+  existingKeys: string[];
 }
 
-export default function CreateEnvironmentModal({
+export default function CreateVariableModal({
   onClose,
-  onCreate,
-}: CreateEnvironmentModalProps) {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  onSubmit,
+  existingKeys,
+}: CreateVariableModalProps) {
+  const [key, setKey] = useState('');
+  const [value, setValue] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name.trim()) {
-      setError('Environment name is required');
+    if (!key.trim()) {
+      setError('Key is required');
+      return;
+    }
+
+    if (existingKeys.includes(key.trim())) {
+      setError('A variable with this key already exists');
       return;
     }
 
@@ -28,9 +35,9 @@ export default function CreateEnvironmentModal({
     setError(null);
 
     try {
-      await onCreate(name.trim(), description.trim() || undefined);
+      await onSubmit(key.trim(), value);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create environment');
+      setError(err instanceof Error ? err.message : 'Failed to create variable');
       setLoading(false);
     }
   };
@@ -40,7 +47,7 @@ export default function CreateEnvironmentModal({
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold" style={{ color: '#2C2C2C' }}>
-            Create Environment
+            Create Variable
           </h2>
           <button
             onClick={onClose}
@@ -56,19 +63,19 @@ export default function CreateEnvironmentModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label
-              htmlFor="name"
+              htmlFor="key"
               className="block text-sm font-medium mb-2"
               style={{ color: '#2C2C2C' }}
             >
-              Name <span style={{ color: '#C85A5A' }}>*</span>
+              Key <span style={{ color: '#C85A5A' }}>*</span>
             </label>
             <input
-              id="name"
+              id="key"
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={key}
+              onChange={(e) => setKey(e.target.value)}
               required
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none transition-colors"
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none transition-colors font-mono"
               style={{ 
                 borderColor: '#E8E6E1',
                 backgroundColor: '#FFFFFF',
@@ -76,25 +83,29 @@ export default function CreateEnvironmentModal({
               }}
               onFocus={(e) => e.currentTarget.style.borderColor = '#5B8DB8'}
               onBlur={(e) => e.currentTarget.style.borderColor = '#E8E6E1'}
-              placeholder="e.g., development, production"
+              placeholder="VARIABLE_NAME"
               disabled={loading}
             />
+            <p className="mt-1 text-xs" style={{ color: '#9A9A9A' }}>
+              Variable names are case-sensitive
+            </p>
           </div>
 
           <div>
             <label
-              htmlFor="description"
+              htmlFor="value"
               className="block text-sm font-medium mb-2"
               style={{ color: '#2C2C2C' }}
             >
-              Description
+              Value <span style={{ color: '#C85A5A' }}>*</span>
             </label>
             <textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={3}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none transition-colors"
+              id="value"
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              rows={4}
+              required
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none transition-colors font-mono"
               style={{ 
                 borderColor: '#E8E6E1',
                 backgroundColor: '#FFFFFF',
@@ -102,7 +113,7 @@ export default function CreateEnvironmentModal({
               }}
               onFocus={(e) => e.currentTarget.style.borderColor = '#5B8DB8'}
               onBlur={(e) => e.currentTarget.style.borderColor = '#E8E6E1'}
-              placeholder="Optional description for this environment"
+              placeholder="variable value"
               disabled={loading}
             />
           </div>
@@ -127,16 +138,16 @@ export default function CreateEnvironmentModal({
             </button>
             <button
               type="submit"
-              disabled={loading || !name.trim()}
+              disabled={loading || !key.trim() || !value.trim()}
               className="px-4 py-2 text-white font-medium rounded-lg transition-colors shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ backgroundColor: loading || !name.trim() ? '#9A9A9A' : '#5B8DB8' }}
+              style={{ backgroundColor: loading || !key.trim() || !value.trim() ? '#9A9A9A' : '#5B8DB8' }}
               onMouseEnter={(e) => {
-                if (!loading && name.trim()) {
+                if (!loading && key.trim() && value.trim()) {
                   e.currentTarget.style.backgroundColor = '#4A7BA5';
                 }
               }}
               onMouseLeave={(e) => {
-                if (!loading && name.trim()) {
+                if (!loading && key.trim() && value.trim()) {
                   e.currentTarget.style.backgroundColor = '#5B8DB8';
                 }
               }}

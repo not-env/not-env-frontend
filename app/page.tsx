@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Logo from '@/components/Logo';
 
 export default function LoginPage() {
   const [apiKey, setApiKey] = useState('');
@@ -42,13 +43,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-      <div className="w-full max-w-md p-8 bg-white dark:bg-slate-800 rounded-lg shadow-xl">
+    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#FEFCF8' }}>
+      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-xl" style={{ borderColor: '#E8E6E1' }}>
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-            Not-Env
-          </h1>
-          <p className="text-slate-600 dark:text-slate-400">
+          <div className="flex justify-center mb-6">
+            <Logo size="medium" />
+          </div>
+          <p style={{ color: '#6B6B6B' }}>
             Enter your API key to continue
           </p>
         </div>
@@ -57,7 +58,8 @@ export default function LoginPage() {
           <div>
             <label
               htmlFor="apiKey"
-              className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+              className="block text-sm font-medium mb-2"
+              style={{ color: '#2C2C2C' }}
             >
               API Key
             </label>
@@ -67,32 +69,50 @@ export default function LoginPage() {
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none transition-colors"
+              style={{ 
+                borderColor: '#E8E6E1',
+                backgroundColor: '#FFFFFF',
+                color: '#2C2C2C',
+              }}
+              onFocus={(e) => e.currentTarget.style.borderColor = '#5B8DB8'}
+              onBlur={(e) => e.currentTarget.style.borderColor = '#E8E6E1'}
               placeholder="Enter your API key"
               disabled={loading}
             />
-            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+            <p className="mt-2 text-xs" style={{ color: '#9A9A9A' }}>
               Your API key is encrypted and stored securely in a session cookie
             </p>
           </div>
 
           {error && (
-            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-              <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
+            <div className="p-3 rounded-lg border" style={{ backgroundColor: '#F5E8E8', borderColor: '#C85A5A' }}>
+              <p className="text-sm" style={{ color: '#B54848' }}>{error}</p>
             </div>
           )}
 
           <button
             type="submit"
             disabled={loading || !apiKey}
-            className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors duration-200"
+            className="w-full py-2 px-4 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ backgroundColor: loading || !apiKey ? '#9A9A9A' : '#5B8DB8' }}
+            onMouseEnter={(e) => {
+              if (!loading && apiKey) {
+                e.currentTarget.style.backgroundColor = '#4A7BA5';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!loading && apiKey) {
+                e.currentTarget.style.backgroundColor = '#5B8DB8';
+              }
+            }}
           >
             {loading ? 'Validating...' : 'Continue'}
           </button>
         </form>
 
-        <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
-          <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
+        <div className="mt-6 pt-6 border-t" style={{ borderColor: '#E8E6E1' }}>
+          <p className="text-xs text-center" style={{ color: '#9A9A9A' }}>
             Need help? Check the documentation for API key types:
             <br />
             <span className="font-mono text-xs">APP_ADMIN</span>,{' '}

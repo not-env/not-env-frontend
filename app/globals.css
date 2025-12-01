@@ -3,26 +3,37 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+  /* Light theme (ivory/bone) */
+  --bg-primary: #FEFCF8;
+  --bg-secondary: #FFFFFF;
+  --bg-tertiary: #FAF8F3;
+  --text-primary: #2C2C2C;
+  --text-secondary: #6B6B6B;
+  --text-tertiary: #9A9A9A;
+  --border-primary: #E8E6E1;
+  --border-secondary: #D4D2CD;
+  --blue-primary: #5B8DB8;
+  --blue-hover: #4A7BA5;
+  --blue-light: #E8F0F7;
+  --blue-dark: #3D6B94;
+  --red-primary: #C85A5A;
+  --red-hover: #B54848;
+  --red-light: #F5E8E8;
+  --green-primary: #6B9B7A;
+  --green-hover: #5A8A69;
+  --green-light: #E8F3EC;
+  --yellow-primary: #D4A574;
+  --yellow-hover: #C49564;
+  --yellow-light: #F5EDE3;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
