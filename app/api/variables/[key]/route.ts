@@ -42,23 +42,9 @@ export async function PUT(
 
   try {
     const decodedKey = decodeURIComponent(params.key);
-    console.log('[Variables API] PUT request for key:', decodedKey);
-    console.log('[Variables API] Session info:', {
-      keyType: session.keyType,
-      hasApiKey: !!session.apiKey,
-      apiKeyPreview: session.apiKey ? `${session.apiKey.substring(0, 10)}...` : 'none',
-    });
-    
     const body = await request.json();
-    console.log('[Variables API] Request body:', {
-      hasValue: !!body.value,
-      valueType: typeof body.value,
-      valueLength: body.value ? String(body.value).length : 0,
-      valuePreview: body.value ? String(body.value).substring(0, 50) : 'none',
-    });
     
     if (!body.value) {
-      console.log('[Variables API] Invalid body - value missing');
       return NextResponse.json(
         { error: 'Bad Request', message: 'value is required' },
         { status: 400 }
@@ -69,40 +55,18 @@ export async function PUT(
     const stringValue = String(body.value);
     
     if (stringValue === '') {
-      console.log('[Variables API] Invalid body - value is empty string');
       return NextResponse.json(
         { error: 'Bad Request', message: 'value cannot be empty' },
         { status: 400 }
       );
     }
-
-    console.log('[Variables API] Calling setVariable with:', {
-      key: decodedKey,
-      valueLength: stringValue.length,
-      keyType: session.keyType,
-    });
     
     await setVariable(session.apiKey, decodedKey, stringValue);
-    console.log('[Variables API] Variable set successfully');
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('[Variables API] Error setting variable:', {
-      error,
-      message: error instanceof Error ? error.message : String(error),
-      name: error instanceof Error ? error.name : undefined,
-    });
-    
     // If it's a decryption error from the backend, return a more helpful message
     const errorMessage = error instanceof Error ? error.message : 'Failed to set variable';
     if (errorMessage.includes('decryption error')) {
-      console.error('[Variables API] Backend decryption error - this is a backend issue.');
-      console.error('[Variables API] Possible causes:');
-      console.error('  1. Master key (NOT_ENV_MASTER_KEY) changed or incorrect');
-      console.error('  2. Organization DEK was encrypted with a different master key');
-      console.error('  3. Database corruption or organization data issue');
-      console.error('[Variables API] Note: Reading variables works, so DEK decryption should work too.');
-      console.error('[Variables API] This suggests a backend bug or configuration issue.');
-      
       return NextResponse.json(
         { 
           error: 'Internal Server Error', 

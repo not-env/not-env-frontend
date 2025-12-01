@@ -15,18 +15,12 @@ export default function UserMenu({ keyType: propKeyType }: UserMenuProps) {
   const [keyType, setKeyType] = useState<'APP_ADMIN' | 'ENV_ADMIN' | 'ENV_READ_ONLY' | null>(propKeyType || null);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Debug: Log keyType changes
-  useEffect(() => {
-    console.log('[UserMenu] keyType state changed to:', keyType);
-  }, [keyType]);
-
   // Fetch session to get current keyType
   useEffect(() => {
     const fetchSession = async () => {
       try {
         // Add timestamp to prevent caching
         const timestamp = Date.now();
-        console.log('[UserMenu] Fetching session at', new Date().toISOString(), 'with timestamp', timestamp);
         const response = await fetch(`/api/auth/session?t=${timestamp}`, {
           method: 'GET',
           cache: 'no-store',
@@ -35,30 +29,21 @@ export default function UserMenu({ keyType: propKeyType }: UserMenuProps) {
             'Pragma': 'no-cache',
           },
         });
-        console.log('[UserMenu] Session response status:', response.status, response.statusText);
         if (response.ok) {
           const data = await response.json();
-          console.log('[UserMenu] Session data received:', data);
-          console.log('[UserMenu] Setting keyType to:', data.keyType);
           setKeyType(data.keyType);
         } else {
           // Session invalid, clear keyType
-          const errorText = await response.text();
-          console.log('[UserMenu] Session invalid, response:', errorText);
           setKeyType(null);
         }
       } catch (err) {
-        console.error('[UserMenu] Failed to fetch session:', err);
         setKeyType(null);
       }
     };
 
     // If prop is provided, use it immediately, but still verify with session
     if (propKeyType) {
-      console.log('[UserMenu] Prop keyType provided:', propKeyType);
       setKeyType(propKeyType);
-    } else {
-      console.log('[UserMenu] No prop keyType provided');
     }
     
     // Always fetch from session to ensure we have the latest value
@@ -66,7 +51,6 @@ export default function UserMenu({ keyType: propKeyType }: UserMenuProps) {
     
     // Also fetch again after a short delay to catch session updates after page reload
     const timeout = setTimeout(() => {
-      console.log('[UserMenu] Delayed fetch after 500ms');
       fetchSession();
     }, 500);
     
