@@ -44,31 +44,16 @@ export async function getSession(): Promise<SessionData | null> {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get('session');
   
-  console.log('[Cookie] getSession called, cookie exists:', !!sessionCookie?.value);
-  
   if (!sessionCookie?.value) {
-    console.log('[Cookie] No session cookie found');
     return null;
   }
   
-  const decrypted = await decryptSession(sessionCookie.value);
-  console.log('[Cookie] Decrypted session:', decrypted ? {
-    keyType: decrypted.keyType,
-    apiKey: decrypted.apiKey ? `${decrypted.apiKey.substring(0, 10)}...` : 'none',
-    expiresAt: new Date(decrypted.expiresAt).toISOString(),
-  } : 'null');
-  
-  return decrypted;
+  return await decryptSession(sessionCookie.value);
 }
 
 export async function setSession(data: Omit<SessionData, 'expiresAt'>): Promise<void> {
   const expiresAt = Date.now() + SESSION_DURATION;
   const sessionData: SessionData = { ...data, expiresAt };
-  console.log('[Cookie] Setting session with data:', {
-    keyType: sessionData.keyType,
-    apiKey: sessionData.apiKey ? `${sessionData.apiKey.substring(0, 10)}...` : 'none',
-    expiresAt: new Date(expiresAt).toISOString(),
-  });
   const token = await encryptSession(sessionData);
   
   const cookieStore = await cookies();
@@ -79,19 +64,12 @@ export async function setSession(data: Omit<SessionData, 'expiresAt'>): Promise<
     maxAge: 60 * 60, // 1 hour in seconds
     path: '/',
   });
-  console.log('[Cookie] Session cookie set successfully');
 }
 
 export async function refreshSession(): Promise<SessionData | null> {
   const session = await getSession();
   
-  console.log('[Cookie] refreshSession called, current session:', session ? {
-    keyType: session.keyType,
-    expiresAt: new Date(session.expiresAt).toISOString(),
-  } : 'null');
-  
   if (!session) {
-    console.log('[Cookie] No session to refresh');
     return null;
   }
   
@@ -100,7 +78,6 @@ export async function refreshSession(): Promise<SessionData | null> {
   const sessionCookie = cookieStore.get('session');
   
   if (!sessionCookie?.value) {
-    console.log('[Cookie] No session cookie found');
     return null;
   }
   
@@ -112,8 +89,6 @@ export async function refreshSession(): Promise<SessionData | null> {
     expiresAt 
   };
   
-  console.log('[Cookie] Refreshing session with keyType:', sessionData.keyType);
-  
   const token = await encryptSession(sessionData);
   
   cookieStore.set('session', token, {
@@ -123,8 +98,6 @@ export async function refreshSession(): Promise<SessionData | null> {
     maxAge: 60 * 60, // 1 hour in seconds
     path: '/',
   });
-  
-  console.log('[Cookie] Session refreshed successfully');
   
   return sessionData;
 }
