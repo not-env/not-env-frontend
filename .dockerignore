@@ -1,0 +1,29 @@
+# Git
+.git
+.gitignore
+
+# Dependencies (will be installed during build)
+node_modules
+
+# Build artifacts
+.next
+out
+
+# Development
+.env.local
+.env.*.local
+*.log
+
+# IDE
+.vscode
+.idea
+
+# Documentation
+*.md
+LICENSE
+
+# Tests
+__tests__
+*.test.*
+jest.config.*
+

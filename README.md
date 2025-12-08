@@ -82,6 +82,46 @@ The frontend supports three types of API keys:
 - Session expiration automatically refreshes on user activity (mouse, keyboard, scroll, touch)
 - Sessions are refreshed on every API request
 
+## Docker Deployment
+
+### Using Published Image
+
+```bash
+# Generate and save your session secret (save this!)
+openssl rand -hex 32
+# Save the output from this and use it for your session secret
+
+docker run -d --name not-env-frontend \
+  -p 3000:3000 \
+  -e NEXT_PUBLIC_API_URL=http://localhost:1212 \
+  -e SESSION_SECRET=[your-session-secret] \
+  ghcr.io/not-env/not-env-frontend:latest
+```
+
+### Building from Source
+
+```bash
+# Generate and save your session secret (save this!)
+openssl rand -hex 32
+# Save the output from this and use it for your session secret
+
+docker build -t not-env-frontend:local .
+docker run -d -p 3000:3000 \
+  -e NEXT_PUBLIC_API_URL=http://localhost:1212 \
+  -e SESSION_SECRET=[your-session-secret] \
+  not-env-frontend:local
+```
+
+### Environment Variables
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `NEXT_PUBLIC_API_URL` | Yes | `http://localhost:1212` | Backend API URL |
+| `SESSION_SECRET` | Yes | None | JWT session secret (generate with `openssl rand -hex 32`) |
+| `DISABLE_SECURE_COOKIE` | No | `false` | Set to `true` to allow cookies over HTTP (for local testing) |
+
+**Note:** For the standalone all-in-one deployment (backend + frontend + SQLite), see the [root README](../README.md#available-docker-images).
+
 ## Development
 
 ### Build for Production

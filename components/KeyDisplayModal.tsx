@@ -152,7 +152,7 @@ export default function KeyDisplayModal({
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4A7BA5'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#5B8DB8'}
           >
-            I've Saved the Keys
+            I&apos;ve Saved the Keys
           </button>
         </div>
       </div>
